@@ -1,6 +1,6 @@
 # Hermes QQBot Adapter
 
-这是一个给 `hermes-agent` 使用的 QQ Bot 适配器打包目录，包含：
+给 `hermes-agent` 一键安装 QQ Bot，包含：
 
 - `qqbot.py`：QQ Open Platform 适配器实现（网关收消息 + REST 发消息）
 - `patch_hermes.py`：自动补丁脚本（把 QQBot 接入到 hermes-agent）
