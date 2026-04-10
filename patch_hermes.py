@@ -169,17 +169,20 @@ _PLATFORMS = [
         patch_file(
             run_py,
             old='''\
-import json
-
-with open(args.config, encoding="utf-8") as f:
-    data = json.load(f)''',
+    if args.config:
+        import json
+        with open(args.config, encoding="utf-8") as f:
+            data = json.load(f)
+            config = GatewayConfig.from_dict(data)''',
             new='''\
-import yaml
-
-with open(args.config, encoding="utf-8") as f:
-    data = yaml.safe_load(f)''',
+    if args.config:
+        import yaml
+        with open(args.config, encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+            config = GatewayConfig.from_dict(data)''',
             label="Fix JSON/YAML bug in gateway/run.py (use yaml.safe_load for YAML files)",
-            already_applied_marker='yaml.safe_load',
+            already_applied_marker='        import yaml\n        with open(args.config',
+            optional=True,
         )
     else:
         print(f"  [skip] gateway/run.py not found")
