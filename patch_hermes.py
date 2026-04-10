@@ -185,7 +185,43 @@ with open(args.config, encoding="utf-8") as f:
         print(f"  [skip] gateway/run.py not found")
 
     # ------------------------------------------------------------------ #
-    # 6. Add qqbot to config.yaml platform_toolsets
+    # 6. Add hermes-qqbot to toolsets.py
+    # ------------------------------------------------------------------ #
+    toolsets_py = agent_dir / "toolsets.py"
+    if toolsets_py.exists():
+        # Insert hermes-qqbot entry before hermes-gateway (which is last)
+        patch_file(
+            toolsets_py,
+            old='''\
+    "hermes-gateway": {
+        "description": "Gateway toolset - union of all messaging platform tools",''',
+            new='''\
+    "hermes-qqbot": {
+        "description": "QQ Bot toolset - QQ Open Platform messaging (full access)",
+        "tools": _HERMES_CORE_TOOLS,
+        "includes": []
+    },
+
+    "hermes-gateway": {
+        "description": "Gateway toolset - union of all messaging platform tools",''',
+            label='Add hermes-qqbot to TOOLSETS in toolsets.py',
+            already_applied_marker='"hermes-qqbot"',
+            optional=True,
+        )
+        # Also add hermes-qqbot to the hermes-gateway includes list
+        patch_file(
+            toolsets_py,
+            old='"includes": ["hermes-telegram", "hermes-discord",',
+            new='"includes": ["hermes-qqbot", "hermes-telegram", "hermes-discord",',
+            label='Add hermes-qqbot to hermes-gateway includes in toolsets.py',
+            already_applied_marker='"hermes-qqbot", "hermes-telegram"',
+            optional=True,
+        )
+    else:
+        print(f"  [skip] toolsets.py not found (optional)")
+
+    # ------------------------------------------------------------------ #
+    # 7. Add qqbot to config.yaml platform_toolsets
     # ------------------------------------------------------------------ #
     config_yaml = agent_dir.parent / "config.yaml"
     if config_yaml.exists():

@@ -56,6 +56,16 @@ HTTP_TIMEOUT = 15.0; SEND_TIMEOUT = 15.0
 RECONNECT_BACKOFF = [2, 5, 10, 30, 60]
 DEDUP_WINDOW_SECONDS = 300; DEDUP_MAX_SIZE = 2000
 _MENTION_RE = re.compile(r"<@!?\d+>")
+# Strip XML-style tool-call tags that some models (longcat, hermes) embed in
+# their output.  These are parsed by the agent runtime but not always removed
+# from the final reply text before it reaches the adapter.
+_TOOL_CALL_RE = re.compile(
+    r"<(?:longcat_tool_call|tool_call|tool_response|function_calls?)>.*?"
+    r"</(?:longcat_tool_call|tool_call|tool_response|function_calls?)>",
+    re.DOTALL,
+)
+# Also strip dangling opening tags (model was cut off mid-generation)
+_TOOL_CALL_OPEN_RE = re.compile(r"<(?:longcat_tool_call|tool_call|function_calls?)>.*", re.DOTALL)
 
 # ── msg_seq counter (per message-id/event-id deduplication) ────────────────────
 _MSG_SEQ_BASE = 1_000_000
@@ -386,6 +396,12 @@ class QQBotAdapter(BasePlatformAdapter):
                    reply_to: Optional[str] = None,
                    metadata: Optional[Dict[str, Any]] = None) -> SendResult:
         metadata = metadata or {}
+        # Strip any residual tool-call XML tags that the agent runtime may have
+        # left in the outgoing text (e.g. <longcat_tool_call>…</longcat_tool_call>).
+        content = self._strip_tool_tags(content)
+        if not content.strip():
+            # Nothing left to send after stripping – skip silently.
+            return SendResult(success=True)
         ctx = metadata.get("reply_context") or self._reply_ctx.get(chat_id) or self._infer_context(chat_id)
         if not ctx:
             return SendResult(success=False,
@@ -612,7 +628,22 @@ class QQBotAdapter(BasePlatformAdapter):
     # -- Helpers --
 
     def _clean_content(self, s: str) -> str:
+        """Clean inbound message content (strip @-mentions)."""
         return _MENTION_RE.sub("", s).strip()
+
+    @staticmethod
+    def _strip_tool_tags(s: str) -> str:
+        """Remove tool-call XML tags from outbound text.
+
+        Handles:
+          - Complete tags: <longcat_tool_call>…</longcat_tool_call>
+          - Dangling open tags (model truncated mid-generation)
+        """
+        s = _TOOL_CALL_RE.sub("", s)
+        s = _TOOL_CALL_OPEN_RE.sub("", s)
+        # Collapse runs of blank lines left behind after removal
+        s = re.sub(r"\n{3,}", "\n\n", s)
+        return s.strip()
 
     def _is_duplicate(self, msg_id: str) -> bool:
         now = time.time()
