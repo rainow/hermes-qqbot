@@ -45,6 +45,7 @@ hermes-qqbot/
 ### macOS / Linux
 
 ```bash
+git clone https://github.com/rainow/hermes-qqbot.git
 cd hermes-qqbot
 ./deploy.sh
 ```
@@ -61,6 +62,7 @@ cd hermes-qqbot
 # 如果提示执行策略限制，先执行一次：
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
+git clone https://github.com/rainow/hermes-qqbot.git
 cd hermes-qqbot
 .\deploy.ps1
 ```
