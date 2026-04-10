@@ -109,7 +109,19 @@ platforms:
 
 ### 启动 hermes-agent
 
-按你原来的方式启动即可，QQBot 会自动加载。
+> **重要**：QQBot 仅在 **gateway 模式**下生效。使用 `hermes chat` 单独开启对话时，QQBot 不会启动。
+
+必须以 gateway 方式启动：
+
+```bash
+hermes gateway start
+```
+
+或直接运行：
+
+```bash
+python -m gateway.run
+```
 
 ---
 
