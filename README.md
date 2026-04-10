@@ -112,24 +112,6 @@ platforms:
 
 ---
 
-## 与 OpenClaw 配置差异（当前版本）
-
-本版本是“最小可用接入”，并未 1:1 覆盖 OpenClaw 所有高级配置项。
-
-当前重点只覆盖：
-
-- `app_id` / `client_secret`（或 `appId` / `clientSecret`）
-- `intents`（可选）
-
-尚未完整对齐的高阶配置（可后续补）：
-
-- 多账号 `accounts/defaultAccount`
-- `streaming`、`markdownSupport`、`c2cMarkdown*`
-- `dmPolicy/groupPolicy/allowFrom/groupAllowFrom`
-- `asr`、`inboundMedia`、`displayAliases`
-
----
-
 ## 常见问题
 
 ### 1) 日志提示未配置凭证
