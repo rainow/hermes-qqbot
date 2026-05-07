@@ -1,3 +1,8 @@
+# 弃用声明（Deprecated Notice）
+Hermes已经官方支持QQ平台，不需要这个插件，本项目已废弃并归档。
+
+————
+
 # Hermes QQBot Adapter
 
 给 `hermes-agent` 一键安装 QQ Bot，包含：
